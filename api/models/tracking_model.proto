@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package trackbox.models.v1;
+option go_package = "trackbox/internal/pb/models";
+
+import "google/protobuf/timestamp.proto";
+
+message TrackingEvent {
+  uint64 id = 1;
+  uint64 tracking_id = 2;
+
+  string status = 3;
+  string status_raw = 4;
+
+  google.protobuf.Timestamp event_time = 5;
+  string location = 6;
+  string message = 7;
+
+  // В protobuf это string (JSON), чтобы не тащить structpb/any.
+  string payload_json = 8;
+
+  google.protobuf.Timestamp created_at = 9;
+}
+
+message Tracking {
+  uint64 id = 1;
+  string carrier_code = 2;
+  string track_number = 3;
+
+  string status = 4;
+  string status_raw = 5;
+
+  google.protobuf.Timestamp status_at = 6;
+  google.protobuf.Timestamp last_checked_at = 7;
+  google.protobuf.Timestamp next_check_at = 8;
+
+  int32 check_fail_count = 9;
+  string last_error = 10;
+
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message TrackingCreateInput {
+  string carrier_code = 1;
+  string track_number = 2;
+}
+
+

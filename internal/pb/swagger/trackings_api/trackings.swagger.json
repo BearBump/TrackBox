@@ -1,0 +1,358 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "trackings_api/trackings.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "TrackingsService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/trackings": {
+      "post": {
+        "operationId": "TrackingsService_CreateTrackings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateTrackingsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateTrackingsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TrackingsService"
+        ]
+      }
+    },
+    "/trackings/get-by-ids": {
+      "post": {
+        "operationId": "TrackingsService_GetTrackingsByIds",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetTrackingsByIdsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GetTrackingsByIdsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TrackingsService"
+        ]
+      }
+    },
+    "/trackings/{trackingId}/events": {
+      "get": {
+        "operationId": "TrackingsService_ListTrackingEvents",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListTrackingEventsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "TrackingsService"
+        ]
+      }
+    },
+    "/trackings/{trackingId}/refresh": {
+      "post": {
+        "operationId": "TrackingsService_RefreshTracking",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TrackingsServiceRefreshTrackingBody"
+            }
+          }
+        ],
+        "tags": [
+          "TrackingsService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "TrackingsServiceRefreshTrackingBody": {
+      "type": "object"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1CreateTrackingsRequest": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1TrackingCreateInput"
+          }
+        }
+      }
+    },
+    "v1CreateTrackingsResponse": {
+      "type": "object",
+      "properties": {
+        "trackings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Tracking"
+          }
+        }
+      }
+    },
+    "v1GetTrackingsByIdsRequest": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uint64"
+          }
+        }
+      }
+    },
+    "v1GetTrackingsByIdsResponse": {
+      "type": "object",
+      "properties": {
+        "trackings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Tracking"
+          }
+        }
+      }
+    },
+    "v1ListTrackingEventsResponse": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1TrackingEvent"
+          }
+        }
+      }
+    },
+    "v1Tracking": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "carrierCode": {
+          "type": "string"
+        },
+        "trackNumber": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "statusRaw": {
+          "type": "string"
+        },
+        "statusAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastCheckedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nextCheckAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "checkFailCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastError": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1TrackingCreateInput": {
+      "type": "object",
+      "properties": {
+        "carrierCode": {
+          "type": "string"
+        },
+        "trackNumber": {
+          "type": "string"
+        }
+      }
+    },
+    "v1TrackingEvent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "trackingId": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "status": {
+          "type": "string"
+        },
+        "statusRaw": {
+          "type": "string"
+        },
+        "eventTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "location": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "payloadJson": {
+          "type": "string",
+          "description": "В protobuf это string (JSON), чтобы не тащить structpb/any."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

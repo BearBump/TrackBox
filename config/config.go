@@ -10,7 +10,8 @@ import (
 type Config struct {
 	Database               DatabaseConfig         `yaml:"database"`
 	Kafka                  KafkaConfig            `yaml:"kafka"`
-	StudentServiceSettings StudentServiceSettings `yaml:"StudentServiceSettings"`
+	Redis                  RedisConfig            `yaml:"redis"`
+	TrackBox               TrackBoxConfig         `yaml:"trackbox"`
 }
 
 type DatabaseConfig struct {
@@ -25,13 +26,25 @@ type DatabaseConfig struct {
 type KafkaConfig struct {
 	Host                       string `yaml:"host"`
 	Port                       int    `yaml:"port"`
-	StudentInfoUpsertTopicName string `yaml:"student_info_upsert_topic_name"`
-	StudentInfoEventTopicName  string `yaml:"student_info_event_topic_name"`
+	TrackingUpdatedTopicName   string `yaml:"tracking_updated_topic_name"`
 }
 
-type StudentServiceSettings struct {
-	MinNameLen int `yaml:"minNameLen"`
-	MaxNameLen int `yaml:"maxNameLen"`
+type RedisConfig struct {
+	Host string `yaml:"host"`
+	Port int    `yaml:"port"`
+}
+
+type TrackBoxConfig struct {
+	GRPCAddr          string `yaml:"grpc_addr"`
+	HTTPAddr          string `yaml:"http_addr"`
+	KafkaConsumerGroup string `yaml:"kafka_consumer_group"`
+	CurrentStatusTTLSeconds int `yaml:"current_status_ttl_seconds"`
+
+	WorkerPollIntervalSeconds int `yaml:"worker_poll_interval_seconds"`
+	WorkerBatchSize           int `yaml:"worker_batch_size"`
+	WorkerConcurrency         int `yaml:"worker_concurrency"`
+	WorkerLeaseSeconds        int `yaml:"worker_lease_seconds"`
+	WorkerRateLimitPerMinute  int `yaml:"worker_rate_limit_per_minute"`
 }
 
 func LoadConfig(filename string) (*Config, error) {
