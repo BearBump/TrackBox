@@ -1,0 +1,53 @@
+# ===== Go =====
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.prof
+
+# Coverage / reports
+cover*.out
+cover*.func.txt
+
+# Go build cache/output (optional, but common)
+bin/
+dist/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# ===== Node (если появится) =====
+node_modules/
+
+# ===== OS / IDE =====
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+.idea/
+.vscode/
+
+# Cursor/IDE artifacts
+.cursor/
+terminals/
+
+# ===== Local env files =====
+.env
+.env.*
+
+

@@ -1,13 +1,20 @@
-# TrackBox (Go часть): `track-api` + `track-worker` + Postgres + Kafka + Redis
+# TrackBox: `track-api` + `track-worker` + Postgres + Kafka + Redis (+ 2 вспомогательных Python-приложения)
 
-Этот репозиторий реализует Go-часть проекта **TrackBox** по ТЗ:
-- **`track-api`** — gRPC + HTTP (grpc-gateway) API, Swagger UI, consumer Kafka `tracking.updated`, запись в Postgres + Redis кэш текущего статуса.
-- **`track-worker`** — воркер/поллер: выбирает due-треки из Postgres (`next_check_at <= now()`), соблюдает rate limit через Redis, публикует обновления в Kafka `tracking.updated`.
+Этот репозиторий реализует проект **TrackBox** по ТЗ: хранение трек‑номеров, обновление статусов в фоне, история событий и демонстрация пайплайна через Kafka.
 
-Для демонстрации используется `carrier-emulator` (Python), который эмулирует “перевозчиков” **CDEK** и **POST_RU**:
-- эндпоинт: `GET /v1/tracking/{carrier}/{track_number}`
-- внутри есть stateful‑прогрессия статуса (не каждый запрос меняет статус)
-- лимиты per‑carrier (может отдавать `429`)
+## Что внутри
+
+- **`cmd/track-api`**: HTTP API (grpc-gateway) + Swagger, читает Kafka `tracking.updated`, пишет в Postgres и кэширует текущий статус в Redis.
+- **`cmd/track-worker`**: фоновые проверки треков. Берёт из Postgres только те, у кого `next_check_at <= now()`, соблюдает rate-limit per carrier (Redis), ходит во внешний “carrier API”, публикует результат в Kafka `tracking.updated`.
+- **`carrier-emulator/` (Python)**: фейковый “внешний сервис перевозчиков” для демо. Умеет прогрессировать статус со временем и отдавать `429` при превышении лимита.
+- **`demo-generator/` (Python)**: генерация демо‑данных: создаёт трек‑номера, seed’ит эмулятор сценариями и массово добавляет треки в `track-api` пачками.
+
+## Почему в проекте есть 2 Python-приложения
+
+Они нужны именно для **демонстрации**, чтобы показать “как будто мы ходим в реальные CDEK/Почта РФ/агрегатор” и чтобы быстро наполнять систему большим числом треков.
+
+- **`carrier-emulator`** — имитирует внешний API перевозчиков. Это позволяет демонстрировать воркер и ограничения (rate limits), не завися от реальных сервисов.
+- **`demo-generator`** — имитирует клиента/интеграцию, которая массово добавляет треки и “подготавливает” эмулятор, чтобы статусы выглядели правдоподобно.
 
 ## Быстрый старт (Docker)
 
@@ -31,12 +38,29 @@ curl "http://localhost:9000/v1/tracking/CDEK/1234567890?apiKey=demo-key"
 curl "http://localhost:9000/v1/tracking/POST_RU/RA123456789RU?apiKey=demo-key"
 ```
 
-## Быстрый старт (локально, без Docker для Go)
+## Демо-сценарий (коротко)
 
-Инфраструктура (Postgres/Kafka/Redis) — через docker-compose:
+1) Запусти всё через Docker: `docker compose up -d --build`
+2) Нагенерь треки и добавь их в систему:
 
 ```bash
-docker compose up -d postgres redis kafka kafka-ui
+python -m pip install -r demo-generator/requirements.txt
+python demo-generator/main.py --api-base http://localhost:8080 --emulator-base http://localhost:9000 --count 500 --batch 100 --rps 10 --carriers CDEK,POST_RU
+```
+
+3) Открой Swagger и посмотри:
+- `POST /trackings/get-by-ids` — “текущее состояние” треков (попробуй ids `[1,2,3]`)
+- `GET /trackings/{trackingId}/events` — история событий по треку
+- `POST /trackings/{trackingId}/refresh` — “ускоритель”: делает трек срочным (ставит ближайший `next_check_at`)
+
+4) Открой Kafka UI и посмотри топик `tracking.updated` — это сообщения, которые воркер публикует, а `track-api` читает и сохраняет.
+
+## Быстрый старт (локально, без Docker для Go)
+
+Инфраструктура (Postgres/Kafka/Redis + carrier-emulator) — через docker-compose:
+
+```bash
+docker compose up -d postgres redis kafka kafka-ui carrier-emulator
 ```
 
 Запуск `track-api`:
@@ -53,6 +77,14 @@ go run .\cmd\track-api
 $env:configPath="C:\Users\Mi\Desktop\4_course\TrackBox\config.trackbox.yaml"
 go run .\cmd\track-worker
 ```
+
+## Windows .bat (удобный запуск Python)
+
+Есть готовые батники:
+- `run-carrier-emulator.bat` — поднять `carrier-emulator` локально (создаёт `.venv`, ставит зависимости, запускает uvicorn на 9000)
+- `run-demo-generator.bat` — запустить `demo-generator`
+  - если запустить **без параметров** (двойной клик) — спросит `COUNT/BATCH/RPS/...`
+  - если запустить **с параметрами** — просто прокинет их внутрь
 
 ## Demo-generator (Python)
 
@@ -125,6 +157,11 @@ Consumer: `track-api`
 go test -cover ./...
 ```
 
-Текущее суммарное покрытие (по `go tool cover -func cover.out`) ≥ 50%.
+Суммарное покрытие можно посмотреть так:
+
+```bash
+go test -coverprofile cover.out ./...
+go tool cover -func cover.out
+```
 
 
