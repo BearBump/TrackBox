@@ -1,0 +1,9 @@
+packages:
+    github.com/Domenick1991/students/internal/services/studentsService:
+        config:
+            dir: "{{.InterfaceDir}}/mocks"
+            filename: "mocks.go"
+            pkgname: "mocks"
+            structname: "{{.InterfaceName}}"
+        interfaces:
+            StudentStorage:
