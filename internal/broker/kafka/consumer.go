@@ -8,8 +8,13 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+type messageReader interface {
+	ReadMessage(ctx context.Context) (kafka.Message, error)
+	Close() error
+}
+
 type Consumer struct {
-	r *kafka.Reader
+	r messageReader
 }
 
 func NewConsumer(brokers []string, topic, groupID string) *Consumer {
@@ -22,6 +27,10 @@ func NewConsumer(brokers []string, topic, groupID string) *Consumer {
 			SessionTimeout:    30 * time.Second,
 		}),
 	}
+}
+
+func newConsumerWithReader(r messageReader) *Consumer {
+	return &Consumer{r: r}
 }
 
 func (c *Consumer) Close() error {

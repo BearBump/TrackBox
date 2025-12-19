@@ -45,6 +45,8 @@ type TrackBoxConfig struct {
 	WorkerConcurrency         int `yaml:"worker_concurrency"`
 	WorkerLeaseSeconds        int `yaml:"worker_lease_seconds"`
 	WorkerRateLimitPerMinute  int `yaml:"worker_rate_limit_per_minute"`
+	WorkerRateLimitCDEKPerMinute   int `yaml:"worker_rate_limit_cdek_per_minute"`
+	WorkerRateLimitPostRuPerMinute int `yaml:"worker_rate_limit_post_ru_per_minute"`
 
 	CarrierEmulatorBaseURL string `yaml:"carrier_emulator_base_url"`
 	CarrierEmulatorMode    string `yaml:"carrier_emulator_mode"` // "track24" | "gdeposylka"

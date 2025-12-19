@@ -111,6 +111,21 @@ func TestService_GetTrackingsByIDs_cacheHit(t *testing.T) {
 	require.Nil(t, r.getIn) // БД не трогали
 }
 
+func TestService_GetTrackingsByIDs_cacheMissHitsDBAndSetsCache(t *testing.T) {
+	r := &fakeRepo{
+		getOut: []*models.Tracking{{ID: 1, CarrierCode: "C", TrackNumber: "N", Status: "UNKNOWN"}},
+	}
+	c := &fakeCache{m: map[string][]byte{}}
+	s := New(r, c, 10*time.Minute)
+
+	out, err := s.GetTrackingsByIDs(context.Background(), []uint64{1})
+	require.NoError(t, err)
+	require.Len(t, out, 1)
+	require.Equal(t, []uint64{1}, r.getIn)
+	_, ok := c.m["tracking:1:current"]
+	require.True(t, ok)
+}
+
 func TestService_ApplyKafkaUpdate_buildsUpdate(t *testing.T) {
 	r := &fakeRepo{getOut: []*models.Tracking{{ID: 1}}}
 	s := New(r, nil, 0)
@@ -130,6 +145,12 @@ func TestService_ApplyKafkaUpdate_buildsUpdate(t *testing.T) {
 	require.Equal(t, uint64(1), r.applyUpd.TrackingID)
 	require.Equal(t, "IN_TRANSIT", r.applyUpd.Status)
 	require.Len(t, r.applyUpd.Events, 1)
+}
+
+func TestService_ListTrackingEvents_passthrough(t *testing.T) {
+	r := &fakeRepo{}
+	s := New(r, nil, 0)
+	_, _ = s.ListTrackingEvents(context.Background(), 1, 10, 0)
 }
 
 

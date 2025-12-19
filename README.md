@@ -4,7 +4,10 @@
 - **`track-api`** — gRPC + HTTP (grpc-gateway) API, Swagger UI, consumer Kafka `tracking.updated`, запись в Postgres + Redis кэш текущего статуса.
 - **`track-worker`** — воркер/поллер: выбирает due-треки из Postgres (`next_check_at <= now()`), соблюдает rate limit через Redis, публикует обновления в Kafka `tracking.updated`.
 
-Для демонстрации используется `carrier-emulator` (Python), который эмулирует внешний агрегатор в стиле Track24 (endpoint совместим с `tracking.json.php`).
+Для демонстрации используется `carrier-emulator` (Python), который эмулирует “перевозчиков” **CDEK** и **POST_RU**:
+- эндпоинт: `GET /v1/tracking/{carrier}/{track_number}`
+- внутри есть stateful‑прогрессия статуса (не каждый запрос меняет статус)
+- лимиты per‑carrier (может отдавать `429`)
 
 ## Быстрый старт (Docker)
 
@@ -19,6 +22,14 @@ docker compose up -d --build
 - Swagger UI: `http://localhost:8080/docs/`
 - Swagger JSON: `http://localhost:8080/swagger.json`
 - Kafka UI: `http://localhost:8081`
+- Carrier emulator: `http://localhost:9000`
+
+Примеры запросов к эмулятору:
+
+```bash
+curl "http://localhost:9000/v1/tracking/CDEK/1234567890?apiKey=demo-key"
+curl "http://localhost:9000/v1/tracking/POST_RU/RA123456789RU?apiKey=demo-key"
+```
 
 ## Быстрый старт (локально, без Docker для Go)
 
@@ -41,6 +52,15 @@ go run .\cmd\track-api
 ```powershell
 $env:configPath="C:\Users\Mi\Desktop\4_course\TrackBox\config.trackbox.yaml"
 go run .\cmd\track-worker
+```
+
+## Demo-generator (Python)
+
+Генерирует трек-номера (CDEK/POST_RU), seed'ит `carrier-emulator` сценариями (`/v1/admin/seed-v1`) и массово добавляет треки в `track-api`.
+
+```bash
+python -m pip install -r demo-generator/requirements.txt
+python demo-generator/main.py --api-base http://localhost:8080 --emulator-base http://localhost:9000 --count 10000 --batch 200 --rps 20 --carriers CDEK,POST_RU
 ```
 
 ## API (минимум по ТЗ)

@@ -63,6 +63,10 @@ func TestTrackingsAPI_Flow(t *testing.T) {
 	require.Len(t, created.Trackings, 1)
 	require.Equal(t, uint64(1), created.Trackings[0].Id)
 
+	byIDs, err := api.GetTrackingsByIds(context.Background(), &trackings_api.GetTrackingsByIdsRequest{Ids: []uint64{1}})
+	require.NoError(t, err)
+	require.Len(t, byIDs.Trackings, 1)
+
 	evs, err := api.ListTrackingEvents(context.Background(), &trackings_api.ListTrackingEventsRequest{
 		TrackingId: 1,
 		Limit:      10,

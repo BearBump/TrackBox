@@ -38,6 +38,8 @@ type Poller struct {
 	concurrency int
 	lease time.Duration
 	rateLimitPerMinute int64
+	rateLimitCDEKPerMinute int64
+	rateLimitPostRuPerMinute int64
 }
 
 func New(repo Repository, carrier carrier.Client, producer Producer, rl RateLimiter, topic string) *Poller {
@@ -66,6 +68,16 @@ func (p *Poller) WithSettings(pollInterval time.Duration, batchSize, concurrency
 	}
 	if rlPerMin > 0 {
 		p.rateLimitPerMinute = rlPerMin
+	}
+	return p
+}
+
+func (p *Poller) WithCarrierRateLimits(cdekPerMin, postRuPerMin int) *Poller {
+	if cdekPerMin > 0 {
+		p.rateLimitCDEKPerMinute = int64(cdekPerMin)
+	}
+	if postRuPerMin > 0 {
+		p.rateLimitPostRuPerMinute = int64(postRuPerMin)
 	}
 	return p
 }
@@ -104,8 +116,20 @@ func (p *Poller) processOne(ctx context.Context, tr *models.Tracking) error {
 	now := time.Now().UTC()
 
 	if p.rl != nil && p.rateLimitPerMinute > 0 {
+		limit := p.rateLimitPerMinute
+		switch tr.CarrierCode {
+		case "CDEK":
+			if p.rateLimitCDEKPerMinute > 0 {
+				limit = p.rateLimitCDEKPerMinute
+			}
+		case "POST_RU":
+			if p.rateLimitPostRuPerMinute > 0 {
+				limit = p.rateLimitPostRuPerMinute
+			}
+		}
+
 		minuteKey := fmt.Sprintf("rl:carrier:%s:%s", tr.CarrierCode, now.Format("200601021504"))
-		allowed, n, err := p.rl.Allow(ctx, minuteKey, p.rateLimitPerMinute, 70*time.Second)
+		allowed, n, err := p.rl.Allow(ctx, minuteKey, limit, 70*time.Second)
 		if err != nil {
 			return err
 		}

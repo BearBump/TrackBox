@@ -84,4 +84,12 @@ func TestPoller_WithSettings(t *testing.T) {
 	require.Equal(t, int64(13), p.rateLimitPerMinute)
 }
 
+func TestPoller_WithCarrierRateLimits(t *testing.T) {
+	fp := &fakeProducer{}
+	p := New(nil, fakeCarrier{}, fp, nil, "t").
+		WithCarrierRateLimits(60, 20)
+	require.Equal(t, int64(60), p.rateLimitCDEKPerMinute)
+	require.Equal(t, int64(20), p.rateLimitPostRuPerMinute)
+}
+
 

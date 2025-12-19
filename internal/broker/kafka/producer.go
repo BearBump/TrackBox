@@ -7,8 +7,12 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+type messageWriter interface {
+	WriteMessages(ctx context.Context, msgs ...kafka.Message) error
+}
+
 type Producer struct {
-	w *kafka.Writer
+	w messageWriter
 }
 
 func NewProducer(brokers []string) *Producer {
@@ -18,6 +22,10 @@ func NewProducer(brokers []string) *Producer {
 			Balancer: &kafka.LeastBytes{},
 		},
 	}
+}
+
+func newProducerWithWriter(w messageWriter) *Producer {
+	return &Producer{w: w}
 }
 
 func (p *Producer) Publish(ctx context.Context, topic string, key, value []byte) error {
