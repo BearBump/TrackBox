@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"trackbox/internal/broker/messages"
-	"trackbox/internal/cache"
-	"trackbox/internal/models"
-	"trackbox/internal/storage/pgtracking"
+	"github.com/BearBump/TrackBox/internal/broker/messages"
+	"github.com/BearBump/TrackBox/internal/cache"
+	"github.com/BearBump/TrackBox/internal/models"
+	"github.com/BearBump/TrackBox/internal/storage/pgtracking"
 	"github.com/pkg/errors"
 )
 

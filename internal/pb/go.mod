@@ -1,4 +1,4 @@
-module trackbox/internal/pb
+module github.com/BearBump/TrackBox/internal/pb
 
 go 1.25.0
 

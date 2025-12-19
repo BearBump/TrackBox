@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"trackbox/internal/models"
+	"github.com/BearBump/TrackBox/internal/models"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 )

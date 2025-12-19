@@ -3,10 +3,10 @@ package trackings_api
 import (
 	"context"
 
-	"trackbox/internal/models"
-	pb_models "trackbox/internal/pb/models"
-	"trackbox/internal/pb/trackings_api"
-	"trackbox/internal/services/trackings"
+	"github.com/BearBump/TrackBox/internal/models"
+	pb_models "github.com/BearBump/TrackBox/internal/pb/models"
+	"github.com/BearBump/TrackBox/internal/pb/trackings_api"
+	"github.com/BearBump/TrackBox/internal/services/trackings"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

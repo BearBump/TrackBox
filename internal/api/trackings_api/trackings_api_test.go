@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"trackbox/internal/models"
-	pb_models "trackbox/internal/pb/models"
-	"trackbox/internal/pb/trackings_api"
-	"trackbox/internal/services/trackings"
-	"trackbox/internal/storage/pgtracking"
+	"github.com/BearBump/TrackBox/internal/models"
+	pb_models "github.com/BearBump/TrackBox/internal/pb/models"
+	"github.com/BearBump/TrackBox/internal/pb/trackings_api"
+	"github.com/BearBump/TrackBox/internal/services/trackings"
+	"github.com/BearBump/TrackBox/internal/storage/pgtracking"
 	"github.com/stretchr/testify/require"
 )
 

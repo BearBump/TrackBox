@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"trackbox/internal/integrations/carrier"
-	"trackbox/internal/models"
+	"github.com/BearBump/TrackBox/internal/integrations/carrier"
+	"github.com/BearBump/TrackBox/internal/models"
 	"github.com/stretchr/testify/require"
 )
 

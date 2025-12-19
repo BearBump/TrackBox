@@ -8,12 +8,14 @@ import (
 	"syscall"
 	"time"
 
-	"trackbox/config"
-	"trackbox/internal/broker/kafka"
-	"trackbox/internal/cache/rediscache"
-	"trackbox/internal/integrations/carrier/fake"
-	"trackbox/internal/services/poller"
-	"trackbox/internal/storage/pgtracking"
+	"github.com/BearBump/TrackBox/config"
+	"github.com/BearBump/TrackBox/internal/broker/kafka"
+	"github.com/BearBump/TrackBox/internal/cache/rediscache"
+	"github.com/BearBump/TrackBox/internal/integrations/carrier"
+	"github.com/BearBump/TrackBox/internal/integrations/carrier/fake"
+	"github.com/BearBump/TrackBox/internal/integrations/carrier/track24http"
+	"github.com/BearBump/TrackBox/internal/services/poller"
+	"github.com/BearBump/TrackBox/internal/storage/pgtracking"
 )
 
 func main() {
@@ -66,7 +68,23 @@ func main() {
 	redisAddr := fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port)
 	rl := rediscache.NewRateLimiter(redisAddr)
 
-	carrierClient := fake.New()
+	// По умолчанию для демо используем эмулятор Track24 (Python), если задан base_url.
+	// Иначе — fallback на локальный fake.
+	var carrierClient carrier.Client
+	if cfg.TrackBox.CarrierEmulatorBaseURL != "" && cfg.TrackBox.CarrierEmulatorMode != "" {
+		switch cfg.TrackBox.CarrierEmulatorMode {
+		case "track24":
+			carrierClient = track24http.New(
+				cfg.TrackBox.CarrierEmulatorBaseURL,
+				cfg.TrackBox.CarrierEmulatorAPIKey,
+				cfg.TrackBox.CarrierEmulatorDomain,
+			)
+		default:
+			carrierClient = fake.New()
+		}
+	} else {
+		carrierClient = fake.New()
+	}
 
 	p := poller.New(st, carrierClient, producer, rl, topic).
 		WithSettings(pollInterval, batchSize, concurrency, lease, rlPerMin)

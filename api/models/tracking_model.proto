@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package trackbox.models.v1;
-option go_package = "trackbox/internal/pb/models";
+option go_package = "github.com/BearBump/TrackBox/internal/pb/models";
 
 import "google/protobuf/timestamp.proto";
 

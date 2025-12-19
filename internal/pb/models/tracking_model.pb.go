@@ -354,7 +354,7 @@ const file_models_tracking_model_proto_rawDesc = "" +
 	"updated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"[\n" +
 	"\x13TrackingCreateInput\x12!\n" +
 	"\fcarrier_code\x18\x01 \x01(\tR\vcarrierCode\x12!\n" +
-	"\ftrack_number\x18\x02 \x01(\tR\vtrackNumberB\x1dZ\x1btrackbox/internal/pb/modelsb\x06proto3"
+	"\ftrack_number\x18\x02 \x01(\tR\vtrackNumberB1Z/github.com/BearBump/TrackBox/internal/pb/modelsb\x06proto3"
 
 var (
 	file_models_tracking_model_proto_rawDescOnce sync.Once

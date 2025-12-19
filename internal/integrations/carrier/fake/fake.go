@@ -5,8 +5,8 @@ import (
 	"hash/fnv"
 	"time"
 
-	"trackbox/internal/integrations/carrier"
-	"trackbox/internal/models"
+	"github.com/BearBump/TrackBox/internal/integrations/carrier"
+	"github.com/BearBump/TrackBox/internal/models"
 )
 
 // FakeClient — временная заглушка "перевозчика" (пока python emulator не готов).

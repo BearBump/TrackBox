@@ -4,7 +4,7 @@
 - **`track-api`** — gRPC + HTTP (grpc-gateway) API, Swagger UI, consumer Kafka `tracking.updated`, запись в Postgres + Redis кэш текущего статуса.
 - **`track-worker`** — воркер/поллер: выбирает due-треки из Postgres (`next_check_at <= now()`), соблюдает rate limit через Redis, публикует обновления в Kafka `tracking.updated`.
 
-Python-приложения (`carrier-emulator`, `demo-generator`) будут добавлены позже; сейчас в воркере используется временный **fake carrier**.
+Для демонстрации используется `carrier-emulator` (Python), который эмулирует внешний агрегатор в стиле Track24 (endpoint совместим с `tracking.json.php`).
 
 ## Быстрый старт (Docker)
 

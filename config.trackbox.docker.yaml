@@ -25,5 +25,9 @@ trackbox:
   worker_concurrency: 10
   worker_lease_seconds: 120
   worker_rate_limit_per_minute: 120
+  carrier_emulator_base_url: "http://carrier-emulator:9000"
+  carrier_emulator_mode: "track24"
+  carrier_emulator_api_key: "demo-key"
+  carrier_emulator_domain: "trackbox.local"
 
 

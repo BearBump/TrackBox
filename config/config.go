@@ -45,6 +45,11 @@ type TrackBoxConfig struct {
 	WorkerConcurrency         int `yaml:"worker_concurrency"`
 	WorkerLeaseSeconds        int `yaml:"worker_lease_seconds"`
 	WorkerRateLimitPerMinute  int `yaml:"worker_rate_limit_per_minute"`
+
+	CarrierEmulatorBaseURL string `yaml:"carrier_emulator_base_url"`
+	CarrierEmulatorMode    string `yaml:"carrier_emulator_mode"` // "track24" | "gdeposylka"
+	CarrierEmulatorAPIKey  string `yaml:"carrier_emulator_api_key"`
+	CarrierEmulatorDomain  string `yaml:"carrier_emulator_domain"`
 }
 
 func LoadConfig(filename string) (*Config, error) {

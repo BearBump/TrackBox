@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"time"
 
-	"trackbox/internal/broker/messages"
-	"trackbox/internal/integrations/carrier"
-	"trackbox/internal/models"
+	"github.com/BearBump/TrackBox/internal/broker/messages"
+	"github.com/BearBump/TrackBox/internal/integrations/carrier"
+	"github.com/BearBump/TrackBox/internal/models"
 	"github.com/pkg/errors"
 )
 

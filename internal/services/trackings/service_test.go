@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"trackbox/internal/broker/messages"
-	"trackbox/internal/models"
-	"trackbox/internal/storage/pgtracking"
+	"github.com/BearBump/TrackBox/internal/broker/messages"
+	"github.com/BearBump/TrackBox/internal/models"
+	"github.com/BearBump/TrackBox/internal/storage/pgtracking"
 	"github.com/stretchr/testify/require"
 )
 

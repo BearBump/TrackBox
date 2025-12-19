@@ -88,6 +88,17 @@ services:
       - postgres
       - redis
       - kafka
+      - carrier-emulator
+    networks:
+      - trackbox-net
+
+  carrier-emulator:
+    build:
+      context: ./carrier-emulator
+      dockerfile: Dockerfile
+    container_name: carrier-emulator
+    ports:
+      - "9000:9000"
     networks:
       - trackbox-net
 

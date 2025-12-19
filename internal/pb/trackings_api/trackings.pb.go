@@ -7,13 +7,13 @@
 package trackings_api
 
 import (
+	models "github.com/BearBump/TrackBox/internal/pb/models"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
-	models "trackbox/internal/pb/models"
 	unsafe "unsafe"
 )
 
@@ -376,7 +376,7 @@ const file_trackings_api_trackings_proto_rawDesc = "" +
 	"/trackings\x12\x98\x01\n" +
 	"\x11GetTrackingsByIds\x12/.trackbox.trackings.v1.GetTrackingsByIdsRequest\x1a0.trackbox.trackings.v1.GetTrackingsByIdsResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/trackings/get-by-ids\x12\xa2\x01\n" +
 	"\x12ListTrackingEvents\x120.trackbox.trackings.v1.ListTrackingEventsRequest\x1a1.trackbox.trackings.v1.ListTrackingEventsResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/trackings/{tracking_id}/events\x12\x85\x01\n" +
-	"\x0fRefreshTracking\x12-.trackbox.trackings.v1.RefreshTrackingRequest\x1a\x16.google.protobuf.Empty\"+\x82\xd3\xe4\x93\x02%:\x01*\" /trackings/{tracking_id}/refreshB$Z\"trackbox/internal/pb/trackings_apib\x06proto3"
+	"\x0fRefreshTracking\x12-.trackbox.trackings.v1.RefreshTrackingRequest\x1a\x16.google.protobuf.Empty\"+\x82\xd3\xe4\x93\x02%:\x01*\" /trackings/{tracking_id}/refreshB8Z6github.com/BearBump/TrackBox/internal/pb/trackings_apib\x06proto3"
 
 var (
 	file_trackings_api_trackings_proto_rawDescOnce sync.Once

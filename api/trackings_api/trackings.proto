@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package trackbox.trackings.v1;
-option go_package = "trackbox/internal/pb/trackings_api";
+option go_package = "github.com/BearBump/TrackBox/internal/pb/trackings_api";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";

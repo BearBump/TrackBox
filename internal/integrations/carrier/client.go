@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"trackbox/internal/models"
+	"github.com/BearBump/TrackBox/internal/models"
 )
 
 type TrackingResult struct {

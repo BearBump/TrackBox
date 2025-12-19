@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"trackbox/internal/models"
+	"github.com/BearBump/TrackBox/internal/models"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"

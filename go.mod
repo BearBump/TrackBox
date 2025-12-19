@@ -1,10 +1,10 @@
-module trackbox
+module github.com/BearBump/TrackBox
 
 go 1.25.0
 
-require trackbox/internal/pb v0.0.0
+require github.com/BearBump/TrackBox/internal/pb v0.0.0
 
-replace trackbox/internal/pb => ./internal/pb
+replace github.com/BearBump/TrackBox/internal/pb => ./internal/pb
 
 require (
 	github.com/alicebob/miniredis/v2 v2.35.0
