@@ -20,3 +20,7 @@ cover:
 
 generate:
 	@./scripts/generate.sh
+
+.PHONY: mock
+mock:
+	mockery

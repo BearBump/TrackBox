@@ -10,4 +10,6 @@ type BytesCache interface {
 	Set(ctx context.Context, key string, value []byte, ttl time.Duration) error
 }
 
+//go:generate mockery
+
 

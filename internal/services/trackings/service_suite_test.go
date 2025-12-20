@@ -7,65 +7,27 @@ import (
 	"testing"
 	"time"
 
+	cachemocks "github.com/BearBump/TrackBox/internal/cache/mocks"
 	"github.com/BearBump/TrackBox/internal/broker/messages"
 	"github.com/BearBump/TrackBox/internal/models"
 	"github.com/BearBump/TrackBox/internal/storage/pgtracking"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+
+	trackingsmocks "github.com/BearBump/TrackBox/internal/services/trackings/mocks"
 )
-
-type MockRepo struct {
-	mock.Mock
-}
-
-func (m *MockRepo) CreateOrGetTrackings(ctx context.Context, items []models.TrackingCreateInput) ([]*models.Tracking, error) {
-	args := m.Called(ctx, items)
-	out, _ := args.Get(0).([]*models.Tracking)
-	return out, args.Error(1)
-}
-func (m *MockRepo) GetTrackingsByIDs(ctx context.Context, ids []uint64) ([]*models.Tracking, error) {
-	args := m.Called(ctx, ids)
-	out, _ := args.Get(0).([]*models.Tracking)
-	return out, args.Error(1)
-}
-func (m *MockRepo) ListTrackingEvents(ctx context.Context, trackingID uint64, limit, offset int) ([]*models.TrackingEvent, error) {
-	args := m.Called(ctx, trackingID, limit, offset)
-	out, _ := args.Get(0).([]*models.TrackingEvent)
-	return out, args.Error(1)
-}
-func (m *MockRepo) RefreshTracking(ctx context.Context, trackingID uint64) error {
-	return m.Called(ctx, trackingID).Error(0)
-}
-func (m *MockRepo) ApplyTrackingUpdate(ctx context.Context, upd pgtracking.TrackingUpdate) error {
-	return m.Called(ctx, upd).Error(0)
-}
-
-type MockCache struct {
-	mock.Mock
-}
-
-func (m *MockCache) Get(ctx context.Context, key string) ([]byte, bool, error) {
-	args := m.Called(ctx, key)
-	b, _ := args.Get(0).([]byte)
-	ok, _ := args.Get(1).(bool)
-	return b, ok, args.Error(2)
-}
-
-func (m *MockCache) Set(ctx context.Context, key string, value []byte, ttl time.Duration) error {
-	return m.Called(ctx, key, value, ttl).Error(0)
-}
 
 type ServiceSuite struct {
 	suite.Suite
 
-	repo  *MockRepo
-	cache *MockCache
+	repo  *trackingsmocks.MockRepository
+	cache *cachemocks.MockBytesCache
 	svc   *Service
 }
 
 func (s *ServiceSuite) SetupTest() {
-	s.repo = &MockRepo{}
-	s.cache = &MockCache{}
+	s.repo = &trackingsmocks.MockRepository{}
+	s.cache = &cachemocks.MockBytesCache{}
 	s.svc = New(s.repo, s.cache, 10*time.Minute)
 }
 

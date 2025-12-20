@@ -21,6 +21,8 @@ type Repository interface {
 	ApplyTrackingUpdate(ctx context.Context, upd pgtracking.TrackingUpdate) error
 }
 
+//go:generate mockery
+
 type Service struct {
 	repo Repository
 	cache cache.BytesCache
