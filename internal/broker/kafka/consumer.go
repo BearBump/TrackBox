@@ -19,14 +19,19 @@ type Consumer struct {
 }
 
 func NewConsumer(brokers []string, topic, groupID string) *Consumer {
+	cfg := kafka.ReaderConfig{
+		Brokers:           brokers,
+		GroupID:           groupID,
+		HeartbeatInterval: 3 * time.Second,
+		SessionTimeout:    30 * time.Second,
+	}
+	if groupID != "" {
+		cfg.GroupTopics = []string{topic}
+	} else {
+		cfg.Topic = topic
+	}
 	return &Consumer{
-		r: kafka.NewReader(kafka.ReaderConfig{
-			Brokers:           brokers,
-			Topic:             topic,
-			GroupID:           groupID,
-			HeartbeatInterval: 3 * time.Second,
-			SessionTimeout:    30 * time.Second,
-		}),
+		r: kafka.NewReader(cfg),
 	}
 }
 
