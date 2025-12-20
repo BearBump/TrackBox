@@ -13,9 +13,10 @@ type fakeReader struct {
 	msgs []kafka.Message
 	err  error
 	i    int
+	committed int
 }
 
-func (r *fakeReader) ReadMessage(ctx context.Context) (kafka.Message, error) {
+func (r *fakeReader) FetchMessage(ctx context.Context) (kafka.Message, error) {
 	if r.i < len(r.msgs) {
 		m := r.msgs[r.i]
 		r.i++
@@ -25,6 +26,11 @@ func (r *fakeReader) ReadMessage(ctx context.Context) (kafka.Message, error) {
 		return kafka.Message{}, r.err
 	}
 	return kafka.Message{}, errors.New("eof")
+}
+
+func (r *fakeReader) CommitMessages(ctx context.Context, msgs ...kafka.Message) error {
+	r.committed += len(msgs)
+	return nil
 }
 
 func (r *fakeReader) Close() error { return nil }
@@ -44,6 +50,7 @@ func TestConsumer_Consume_CallsHandler(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, []byte("k"), gotK)
 	require.Equal(t, []byte("v"), gotV)
+	require.Equal(t, 1, fr.committed)
 }
 
 func TestConsumer_Consume_HandlerErrorStops(t *testing.T) {

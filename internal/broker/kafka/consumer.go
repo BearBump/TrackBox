@@ -9,7 +9,8 @@ import (
 )
 
 type messageReader interface {
-	ReadMessage(ctx context.Context) (kafka.Message, error)
+	FetchMessage(ctx context.Context) (kafka.Message, error)
+	CommitMessages(ctx context.Context, msgs ...kafka.Message) error
 	Close() error
 }
 
@@ -39,14 +40,16 @@ func (c *Consumer) Close() error {
 
 func (c *Consumer) Consume(ctx context.Context, handler func(key, value []byte) error) error {
 	for {
-		msg, err := c.r.ReadMessage(ctx)
+		msg, err := c.r.FetchMessage(ctx)
 		if err != nil {
-			return errors.Wrap(err, "read message")
+			return errors.Wrap(err, "fetch message")
 		}
 		if err := handler(msg.Key, msg.Value); err != nil {
-			// Reader коммитит автоматически после ReadMessage,
-			// поэтому для MVP просто возвращаем ошибку и даём процессу рестартиться.
+			// Важно: commit делаем только при успехе, иначе потеряем сообщение.
 			return err
+		}
+		if err := c.r.CommitMessages(ctx, msg); err != nil {
+			return errors.Wrap(err, "commit message")
 		}
 	}
 }

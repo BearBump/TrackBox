@@ -79,13 +79,15 @@ func runTrackAPI(ctx context.Context, opts trackAPIOpts, svc *trackings.Service,
 
 	go func() {
 		slog.Info("kafka consumer started", "topic", opts.topic, "group", opts.consumerGroup)
-		_ = consumer.Consume(ctx, func(_key, value []byte) error {
+		if err := consumer.Consume(ctx, func(_key, value []byte) error {
 			var m messages.TrackingUpdated
 			if err := json.Unmarshal(value, &m); err != nil {
 				return err
 			}
 			return svc.ApplyKafkaUpdate(ctx, m)
-		})
+		}); err != nil && err != context.Canceled {
+			slog.Error("kafka consumer stopped", "error", err.Error())
+		}
 	}()
 
 	select {
