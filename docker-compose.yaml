@@ -69,6 +69,7 @@ services:
       context: .
       dockerfile: Dockerfile.track-api
     container_name: track-api
+    restart: unless-stopped
     depends_on:
       - postgres
       - redis
@@ -84,6 +85,7 @@ services:
       context: .
       dockerfile: Dockerfile.track-worker
     container_name: track-worker
+    restart: unless-stopped
     depends_on:
       - postgres
       - redis

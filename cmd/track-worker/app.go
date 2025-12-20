@@ -32,7 +32,7 @@ func defaultWorkerFactories() workerFactories {
 			}
 			connString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
 				cfg.Database.Username, cfg.Database.Password, cfg.Database.Host, cfg.Database.Port, cfg.Database.DBName, sslMode)
-			st, err := pgtracking.New(connString)
+			st, err := openPostgresWithRetry(connString, 60*time.Second)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -62,6 +62,20 @@ func defaultWorkerFactories() workerFactories {
 			return fake.New()
 		},
 	}
+}
+
+func openPostgresWithRetry(connString string, wait time.Duration) (*pgtracking.Storage, error) {
+	deadline := time.Now().Add(wait)
+	var lastErr error
+	for time.Now().Before(deadline) {
+		st, err := pgtracking.New(connString)
+		if err == nil {
+			return st, nil
+		}
+		lastErr = err
+		time.Sleep(1 * time.Second)
+	}
+	return nil, fmt.Errorf("postgres is not ready after %s: %w", wait, lastErr)
 }
 
 func RunTrackWorker(ctx context.Context, cfg *config.Config, f workerFactories) error {
