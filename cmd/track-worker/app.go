@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"os"
 	"time"
 
 	"github.com/BearBump/TrackBox/config"
@@ -84,6 +86,16 @@ func RunTrackWorker(ctx context.Context, cfg *config.Config, f workerFactories) 
 		topic = "tracking.updated"
 	}
 
+	// Optional ops HTTP server (Swagger + health).
+	workerHTTPAddr := cfg.TrackBox.WorkerHTTPAddr
+	if workerHTTPAddr == "" {
+		workerHTTPAddr = ":8082"
+	}
+	workerSwaggerPath := os.Getenv("swaggerPath")
+	if workerSwaggerPath == "" {
+		workerSwaggerPath = "/app/swagger.json"
+	}
+
 	pollInterval := time.Duration(cfg.TrackBox.WorkerPollIntervalSeconds) * time.Second
 	if pollInterval <= 0 {
 		pollInterval = 2 * time.Second
@@ -117,9 +129,44 @@ func RunTrackWorker(ctx context.Context, cfg *config.Config, f workerFactories) 
 	rl := f.newRateLimiter(cfg)
 	carrierClient := f.newCarrierClient(cfg)
 
+	plannerCfg := poller.PlannerConfig{}
+	if cfg.TrackBox.WorkerNextCheckInTransitMinSeconds > 0 {
+		plannerCfg.InTransitMinDelay = time.Duration(cfg.TrackBox.WorkerNextCheckInTransitMinSeconds) * time.Second
+	}
+	if cfg.TrackBox.WorkerNextCheckInTransitMaxSeconds > 0 {
+		plannerCfg.InTransitMaxDelay = time.Duration(cfg.TrackBox.WorkerNextCheckInTransitMaxSeconds) * time.Second
+	}
+	if cfg.TrackBox.WorkerNextCheckUnknownSeconds > 0 {
+		plannerCfg.UnknownDelay = time.Duration(cfg.TrackBox.WorkerNextCheckUnknownSeconds) * time.Second
+	}
+	if cfg.TrackBox.WorkerBackoff1Seconds > 0 {
+		plannerCfg.Backoff1 = time.Duration(cfg.TrackBox.WorkerBackoff1Seconds) * time.Second
+	}
+	if cfg.TrackBox.WorkerBackoff2Seconds > 0 {
+		plannerCfg.Backoff2 = time.Duration(cfg.TrackBox.WorkerBackoff2Seconds) * time.Second
+	}
+	if cfg.TrackBox.WorkerBackoff3Seconds > 0 {
+		plannerCfg.Backoff3 = time.Duration(cfg.TrackBox.WorkerBackoff3Seconds) * time.Second
+	}
+	if cfg.TrackBox.WorkerBackoff4Seconds > 0 {
+		plannerCfg.Backoff4 = time.Duration(cfg.TrackBox.WorkerBackoff4Seconds) * time.Second
+	}
+
 	p := poller.New(repo, carrierClient, producer, rl, topic).
 		WithSettings(pollInterval, batchSize, concurrency, lease, rlPerMin).
+		WithPlanner(plannerCfg).
 		WithCarrierRateLimits(cfg.TrackBox.WorkerRateLimitCDEKPerMinute, cfg.TrackBox.WorkerRateLimitPostRuPerMinute)
+
+	go func() {
+		if err := runWorkerHTTPServer(ctx, workerHTTPOpts{
+			httpAddr:    workerHTTPAddr,
+			swaggerPath: workerSwaggerPath,
+			poller:      p,
+			cfg:         cfg,
+		}); err != nil && err != context.Canceled {
+			slog.Error("worker http server stopped", "error", err.Error())
+		}
+	}()
 
 	return p.Run(ctx)
 }

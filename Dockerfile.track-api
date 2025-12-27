@@ -13,6 +13,7 @@ WORKDIR /app
 
 COPY --from=build /out/track-api /app/track-api
 COPY config.trackbox.docker.yaml /app/config.yaml
+COPY config.trackbox.docker.demo.yaml /app/config.demo.yaml
 COPY internal/pb/swagger/trackings_api/trackings.swagger.json /app/swagger.json
 
 ENV configPath=/app/config.yaml

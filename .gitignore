@@ -10,6 +10,9 @@
 # Coverage / reports
 cover*.out
 cover*.func.txt
+cover*.txt
+cover
+cover_*
 
 # Go build cache/output (optional, but common)
 bin/

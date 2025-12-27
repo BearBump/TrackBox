@@ -44,6 +44,10 @@ protoc -I ./api `
   --openapiv2_opt logtostderr=true `
   ./api/trackings_api/trackings.proto
 
+# patch swagger for better Swagger UI UX (no body for /refresh, numeric ids for get-by-ids)
+Write-Host "[generate] patch swagger..."
+powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "patch-swagger.ps1")
+
 Write-Host "[generate] done"
 
 

@@ -31,6 +31,23 @@ docker compose up -d --build
 - Kafka UI: `http://localhost:8081`
 - Carrier emulator: `http://localhost:9000`
 
+### Demo-fast режим (частые проверки воркером)
+
+По умолчанию воркер ставит `next_check_at` **в минутах** (как ближе к прод‑логике, чтобы не “ддосить” перевозчиков).
+Для демонстрации прогресса статуса “каждые несколько секунд” есть готовый конфиг:
+- `config.trackbox.docker.demo.yaml` (для Docker)
+- `config.trackbox.demo.yaml` (для локального запуска Go)
+
+Чтобы включить в Docker, поменяй `configPath` на demo и пересоздай контейнеры:
+
+```bash
+docker compose down
+docker compose up -d --build
+```
+
+И в `docker-compose.yaml` временно выставь:
+`configPath=/app/config.demo.yaml` для `track-api` и `track-worker`.
+
 Примеры запросов к эмулятору:
 
 ```bash

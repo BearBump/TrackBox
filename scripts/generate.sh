@@ -23,3 +23,8 @@ protoc -I ./api \
   --openapiv2_out=./internal/pb/swagger \
   --openapiv2_opt logtostderr=true \
   ./api/trackings_api/trackings.proto
+
+# Патчим swagger.json для удобства Swagger UI (без body для /refresh, numeric ids для get-by-ids)
+if command -v pwsh >/dev/null 2>&1; then
+  pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/patch-swagger.ps1 >/dev/null
+fi

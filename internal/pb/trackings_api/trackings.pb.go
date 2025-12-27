@@ -370,13 +370,13 @@ const file_trackings_api_trackings_proto_rawDesc = "" +
 	"\x06events\x18\x01 \x03(\v2!.trackbox.models.v1.TrackingEventR\x06events\"9\n" +
 	"\x16RefreshTrackingRequest\x12\x1f\n" +
 	"\vtracking_id\x18\x01 \x01(\x04R\n" +
-	"trackingId2\xe4\x04\n" +
+	"trackingId2\xe1\x04\n" +
 	"\x10TrackingsService\x12\x87\x01\n" +
 	"\x0fCreateTrackings\x12-.trackbox.trackings.v1.CreateTrackingsRequest\x1a..trackbox.trackings.v1.CreateTrackingsResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
 	"/trackings\x12\x98\x01\n" +
 	"\x11GetTrackingsByIds\x12/.trackbox.trackings.v1.GetTrackingsByIdsRequest\x1a0.trackbox.trackings.v1.GetTrackingsByIdsResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/trackings/get-by-ids\x12\xa2\x01\n" +
-	"\x12ListTrackingEvents\x120.trackbox.trackings.v1.ListTrackingEventsRequest\x1a1.trackbox.trackings.v1.ListTrackingEventsResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/trackings/{tracking_id}/events\x12\x85\x01\n" +
-	"\x0fRefreshTracking\x12-.trackbox.trackings.v1.RefreshTrackingRequest\x1a\x16.google.protobuf.Empty\"+\x82\xd3\xe4\x93\x02%:\x01*\" /trackings/{tracking_id}/refreshB8Z6github.com/BearBump/TrackBox/internal/pb/trackings_apib\x06proto3"
+	"\x12ListTrackingEvents\x120.trackbox.trackings.v1.ListTrackingEventsRequest\x1a1.trackbox.trackings.v1.ListTrackingEventsResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/trackings/{tracking_id}/events\x12\x82\x01\n" +
+	"\x0fRefreshTracking\x12-.trackbox.trackings.v1.RefreshTrackingRequest\x1a\x16.google.protobuf.Empty\"(\x82\xd3\xe4\x93\x02\"\" /trackings/{tracking_id}/refreshB8Z6github.com/BearBump/TrackBox/internal/pb/trackings_apib\x06proto3"
 
 var (
 	file_trackings_api_trackings_proto_rawDescOnce sync.Once

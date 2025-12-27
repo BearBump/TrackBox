@@ -109,6 +109,21 @@ func (s *ServiceSuite) TestGetTrackingsByIDs_CacheDisabled_GoesToDB() {
 	s.repo.AssertExpectations(s.T())
 }
 
+func (s *ServiceSuite) TestGetTrackingsByIDs_CachePresentButTTLZero_TreatedAsDisabled() {
+	// cache есть, но TTL=0 => кэш выключен, Get/Set не должны вызываться
+	svc := New(s.repo, s.cache, 0)
+	s.repo.On("GetTrackingsByIDs", mock.Anything, []uint64{uint64(1)}).
+		Return([]*models.Tracking{{ID: 1}}, nil).
+		Once()
+
+	out, err := svc.GetTrackingsByIDs(context.Background(), []uint64{1})
+	s.Require().NoError(err)
+	s.Require().Len(out, 1)
+	s.cache.AssertNotCalled(s.T(), "Get", mock.Anything, mock.Anything)
+	s.cache.AssertNotCalled(s.T(), "Set", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	s.repo.AssertExpectations(s.T())
+}
+
 func (s *ServiceSuite) TestGetTrackingsByIDs_CacheMiss_AndSetEvenIfSetFails_OrderPreserved() {
 	ids := []uint64{2, 1}
 	s.cache.On("Get", mock.Anything, "tracking:2:current").
@@ -136,6 +151,24 @@ func (s *ServiceSuite) TestGetTrackingsByIDs_CacheMiss_AndSetEvenIfSetFails_Orde
 	s.Require().Len(out, 2)
 	s.Require().Equal(uint64(2), out[0].ID)
 	s.Require().Equal(uint64(1), out[1].ID)
+	s.repo.AssertExpectations(s.T())
+	s.cache.AssertExpectations(s.T())
+}
+
+func (s *ServiceSuite) TestGetTrackingsByIDs_CacheHitButEmptyBytes_IsMiss() {
+	// cache ok=true, но bytes пустые -> json.Unmarshal падает -> идём в БД
+	s.cache.On("Get", mock.Anything, "tracking:1:current").
+		Return([]byte(nil), true, nil).
+		Once()
+
+	s.repo.On("GetTrackingsByIDs", mock.Anything, []uint64{uint64(1)}).
+		Return([]*models.Tracking{{ID: 1}}, nil).
+		Once()
+	s.cache.On("Set", mock.Anything, "tracking:1:current", mock.Anything, 10*time.Minute).Return(nil).Once()
+
+	out, err := s.svc.GetTrackingsByIDs(context.Background(), []uint64{1})
+	s.Require().NoError(err)
+	s.Require().Len(out, 1)
 	s.repo.AssertExpectations(s.T())
 	s.cache.AssertExpectations(s.T())
 }
@@ -276,6 +309,52 @@ func (s *ServiceSuite) TestApplyKafkaUpdate_DefaultTimes_EventsPayload_AndCacheR
 		StatusRaw:   "RAW",
 		NextCheckAt: time.Now().UTC().Add(1 * time.Minute),
 	}))
+}
+
+func (s *ServiceSuite) TestApplyKafkaUpdate_EmptyPayload_AndLocationMessageBranches() {
+	loc := "Moscow"
+	msgText := "Accepted"
+	evTime := time.Now().UTC()
+
+	s.repo.On("ApplyTrackingUpdate", mock.Anything, mock.MatchedBy(func(upd pgtracking.TrackingUpdate) bool {
+		if len(upd.Events) != 1 {
+			return false
+		}
+		if upd.Events[0].Location == nil || *upd.Events[0].Location != loc {
+			return false
+		}
+		if upd.Events[0].Message == nil || *upd.Events[0].Message != msgText {
+			return false
+		}
+		// payload empty => PayloadJSON должен быть nil
+		if upd.Events[0].PayloadJSON != nil {
+			return false
+		}
+		if !upd.Events[0].EventTime.Equal(evTime) {
+			return false
+		}
+		return true
+	})).Return(nil).Once()
+
+	// cache reload ok => Set вызывается
+	s.repo.On("GetTrackingsByIDs", mock.Anything, []uint64{uint64(3)}).
+		Return([]*models.Tracking{{ID: 3}}, nil).
+		Once()
+	s.cache.On("Set", mock.Anything, "tracking:3:current", mock.Anything, 10*time.Minute).Return(nil).Once()
+
+	s.Require().NoError(s.svc.ApplyKafkaUpdate(context.Background(), messages.TrackingUpdated{
+		TrackingID:  3,
+		CheckedAt:   time.Now().UTC(),
+		Status:      models.TrackingStatusInTransit,
+		StatusRaw:   "RAW",
+		NextCheckAt: time.Now().UTC().Add(1 * time.Minute),
+		Events: []messages.TrackingEvent{
+			{Status: models.TrackingStatusInTransit, StatusRaw: "CDEK: accepted", EventTime: evTime, Location: &loc, Message: &msgText},
+		},
+	}))
+
+	s.repo.AssertExpectations(s.T())
+	s.cache.AssertExpectations(s.T())
 }
 
 func (s *ServiceSuite) TestApplyKafkaUpdate_RepoErrorStops() {

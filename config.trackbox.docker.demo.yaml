@@ -20,19 +20,27 @@ trackbox:
   http_addr: ":8080"
   kafka_consumer_group: "track-api"
   current_status_ttl_seconds: 600
-  worker_poll_interval_seconds: 2
+
+  # Worker cadence (demo-fast)
+  worker_poll_interval_seconds: 1
   worker_batch_size: 100
   worker_concurrency: 10
-  worker_lease_seconds: 120
+  worker_lease_seconds: 10
+
+  # Global + per-carrier limits (keeps system safe even with huge backlog)
   worker_rate_limit_per_minute: 120
   worker_rate_limit_cdek_per_minute: 60
   worker_rate_limit_post_ru_per_minute: 20
-  worker_http_addr: ":8082"
 
-  # Next check scheduling (defaults are 60s now; keeping explicit for clarity)
-  worker_next_check_in_transit_min_seconds: 60
-  worker_next_check_in_transit_max_seconds: 60
-  worker_next_check_unknown_seconds: 60
+  # Scheduling (demo-fast). In prod you can leave these unset (defaults are minutes/hours).
+  worker_next_check_in_transit_min_seconds: 3
+  worker_next_check_in_transit_max_seconds: 8
+  worker_next_check_unknown_seconds: 10
+  worker_backoff_1_seconds: 2
+  worker_backoff_2_seconds: 5
+  worker_backoff_3_seconds: 10
+  worker_backoff_4_seconds: 20
+
   carrier_emulator_base_url: "http://carrier-emulator:9000"
   carrier_emulator_mode: "v1"
   carrier_emulator_api_key: "demo-key"

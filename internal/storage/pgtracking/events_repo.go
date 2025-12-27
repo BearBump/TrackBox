@@ -126,12 +126,22 @@ WHERE id = $1
 				}
 			}
 
+			loc := ""
+			if e.Location != nil {
+				loc = *e.Location
+			}
+			msgText := ""
+			if e.Message != nil {
+				msgText = *e.Message
+			}
+
 			_, err := tx.Exec(ctx, `
 INSERT INTO tracking_events (
   tracking_id, status, status_raw, event_time, location, message, payload, created_at
 )
 VALUES ($1,$2,$3,$4,$5,$6,$7, now())
-`, upd.TrackingID, e.Status, e.StatusRaw, e.EventTime.UTC(), e.Location, e.Message, payload)
+ON CONFLICT (tracking_id, status_raw, event_time, location, message) DO NOTHING
+`, upd.TrackingID, e.Status, e.StatusRaw, e.EventTime.UTC(), loc, msgText, payload)
 			if err != nil {
 				return errors.Wrap(err, "insert tracking event")
 			}

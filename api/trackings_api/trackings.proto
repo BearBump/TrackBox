@@ -31,7 +31,6 @@ service TrackingsService {
   rpc RefreshTracking(RefreshTrackingRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/trackings/{tracking_id}/refresh"
-      body: "*"
     };
   }
 }

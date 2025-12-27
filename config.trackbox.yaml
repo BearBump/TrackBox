@@ -27,6 +27,12 @@ trackbox:
   worker_rate_limit_per_minute: 120
   worker_rate_limit_cdek_per_minute: 60
   worker_rate_limit_post_ru_per_minute: 20
+  worker_http_addr: ":8082"
+
+  # Next check scheduling (defaults are 60s now; keeping explicit for clarity)
+  worker_next_check_in_transit_min_seconds: 60
+  worker_next_check_in_transit_max_seconds: 60
+  worker_next_check_unknown_seconds: 60
   carrier_emulator_base_url: "http://localhost:9000"
   carrier_emulator_mode: "v1"
   carrier_emulator_api_key: "demo-key"

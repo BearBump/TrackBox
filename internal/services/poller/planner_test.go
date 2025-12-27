@@ -4,35 +4,48 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
+	pollermocks "github.com/BearBump/TrackBox/internal/services/poller/mocks"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
-type fakeRand struct{ v int }
-
-func (f fakeRand) Intn(n int) int { return f.v % n }
-
-func TestBackoffDelay(t *testing.T) {
-	require.Equal(t, 5*time.Minute, BackoffDelay(1))
-	require.Equal(t, 15*time.Minute, BackoffDelay(2))
-	require.Equal(t, 30*time.Minute, BackoffDelay(3))
-	require.Equal(t, 60*time.Minute, BackoffDelay(4))
-	require.Equal(t, 60*time.Minute, BackoffDelay(100))
+type PlannerSuite struct {
+	suite.Suite
 }
 
-func TestNextCheckDelay_Delivered(t *testing.T) {
-	d := NextCheckDelay("DELIVERED", 0, fakeRand{v: 0})
-	require.Equal(t, 365*24*time.Hour, d)
+func (s *PlannerSuite) TestBackoffDelay() {
+	s.Equal(5*time.Minute, BackoffDelay(1))
+	s.Equal(15*time.Minute, BackoffDelay(2))
+	s.Equal(30*time.Minute, BackoffDelay(3))
+	s.Equal(60*time.Minute, BackoffDelay(4))
+	s.Equal(60*time.Minute, BackoffDelay(100))
 }
 
-func TestNextCheckDelay_InTransitRange(t *testing.T) {
-	// min=30, max=120, fakeRand(0) => 30
-	d := NextCheckDelay("IN_TRANSIT", 0, fakeRand{v: 0})
-	require.Equal(t, 30*time.Minute, d)
+func (s *PlannerSuite) TestNextCheckDelay_Delivered() {
+	m := &pollermocks.Rand{}
+	d := NextCheckDelay("DELIVERED", 0, m)
+	s.Equal(365*24*time.Hour, d)
 }
 
-func TestNextCheckDelay_Unknown(t *testing.T) {
-	d := NextCheckDelay("UNKNOWN", 0, fakeRand{v: 0})
-	require.Equal(t, 90*time.Minute, d)
+func (s *PlannerSuite) TestNextCheckDelay_InTransit_UsesRand() {
+	// We'll force min==max==60s in default config; still ensure Rand can be passed safely.
+	m := &pollermocks.Rand{}
+	// Intn may or may not be called depending on min/max; just allow any call.
+	m.On("Intn", mock.Anything).Return(0).Maybe()
+
+	d := NextCheckDelay("IN_TRANSIT", 0, m)
+	s.Equal(1*time.Minute, d)
+	m.AssertExpectations(s.T())
+}
+
+func (s *PlannerSuite) TestNextCheckDelay_Unknown() {
+	m := &pollermocks.Rand{}
+	d := NextCheckDelay("UNKNOWN", 0, m)
+	s.Equal(1*time.Minute, d)
+}
+
+func TestPlannerSuite(t *testing.T) {
+	suite.Run(t, new(PlannerSuite))
 }
 
 

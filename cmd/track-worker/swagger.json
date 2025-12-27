@@ -1,0 +1,82 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "TrackBox track-worker (ops API)",
+    "version": "1.0"
+  },
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "healthz",
+        "summary": "Liveness probe",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": { "status": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "readyz",
+        "summary": "Readiness probe",
+        "responses": {
+          "200": {
+            "description": "Ready",
+            "schema": {
+              "type": "object",
+              "properties": { "status": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "operationId": "stats",
+        "summary": "Runtime statistics for the worker",
+        "responses": {
+          "200": {
+            "description": "Stats",
+            "schema": { "type": "object" }
+          }
+        }
+      }
+    },
+    "/config": {
+      "get": {
+        "operationId": "config",
+        "summary": "Operational worker configuration (safe subset)",
+        "responses": {
+          "200": {
+            "description": "Config",
+            "schema": { "type": "object" }
+          }
+        }
+      }
+    },
+    "/trigger": {
+      "post": {
+        "operationId": "trigger",
+        "summary": "Trigger an immediate poll cycle (best-effort)",
+        "responses": {
+          "200": {
+            "description": "Triggered",
+            "schema": {
+              "type": "object",
+              "properties": { "triggered": { "type": "boolean" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+

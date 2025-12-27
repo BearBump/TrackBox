@@ -64,16 +64,36 @@ services:
     networks:
       - trackbox-net
 
+  kafka-init:
+    image: apache/kafka:latest
+    container_name: kafka-init
+    depends_on:
+      - kafka
+    entrypoint: ["/bin/sh","-lc"]
+    command:
+      - >
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9094
+        --create --if-not-exists --topic tracking.updated --partitions 1 --replication-factor 1
+        && echo "kafka-init done";
+    networks:
+      - trackbox-net
+
   track-api:
     build:
       context: .
       dockerfile: Dockerfile.track-api
     container_name: track-api
     restart: unless-stopped
+    environment:
+      # Можно переключить на demo-конфиг (частые проверки) без изменения образа:
+      # - configPath=/app/config.demo.yaml
+      - configPath=/app/config.yaml
+      - swaggerPath=/app/swagger.json
     depends_on:
       - postgres
       - redis
       - kafka
+      - kafka-init
     ports:
       - "8080:8080"
       - "50051:50051"
@@ -86,13 +106,21 @@ services:
       dockerfile: Dockerfile.track-worker
     container_name: track-worker
     restart: unless-stopped
+    environment:
+      # Можно переключить на demo-конфиг (частые проверки) без изменения образа:
+      # - configPath=/app/config.demo.yaml
+      - configPath=/app/config.yaml
+      - swaggerPath=/app/swagger.json
     depends_on:
       - postgres
       - redis
       - kafka
+      - kafka-init
       - carrier-emulator
     networks:
       - trackbox-net
+    ports:
+      - "8082:8082"
 
   carrier-emulator:
     build:

@@ -82,8 +82,10 @@ func runTrackAPI(ctx context.Context, opts trackAPIOpts, svc *trackings.Service,
 		if err := consumer.Consume(ctx, func(_key, value []byte) error {
 			var m messages.TrackingUpdated
 			if err := json.Unmarshal(value, &m); err != nil {
+				slog.Error("kafka message unmarshal failed", "error", err.Error())
 				return err
 			}
+			slog.Info("kafka update received", "tracking_id", m.TrackingID, "status", m.Status)
 			return svc.ApplyKafkaUpdate(ctx, m)
 		}); err != nil && err != context.Canceled {
 			slog.Error("kafka consumer stopped", "error", err.Error())
@@ -126,11 +128,20 @@ func runGRPCServer(ctx context.Context, lis net.Listener, api *trackingsapi.Trac
 func runGatewayServer(ctx context.Context, lis net.Listener, grpcAddr string, swaggerPath string) error {
 	r := chi.NewRouter()
 	r.Get("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		// Swagger UI loves to cache swagger.json very aggressively in browsers,
+		// which makes it look like changes "didn't apply" after rebuilds.
+		w.Header().Set("Cache-Control", "no-store")
 		http.ServeFile(w, r, swaggerPath)
 	})
 
+	swaggerURL := "/swagger.json"
+	if fi, err := os.Stat(swaggerPath); err == nil {
+		// cache-buster
+		swaggerURL = fmt.Sprintf("/swagger.json?v=%d", fi.ModTime().Unix())
+	}
+
 	r.Get("/docs/*", httpSwagger.Handler(
-		httpSwagger.URL("/swagger.json"),
+		httpSwagger.URL(swaggerURL),
 	))
 
 	mux := runtime.NewServeMux()

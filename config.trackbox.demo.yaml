@@ -1,5 +1,5 @@
 database:
-  host: "postgres"
+  host: "localhost"
   port: 5432
   username: "admin"
   password: "admin"
@@ -7,12 +7,12 @@ database:
   ssl_mode: "disable"
 
 kafka:
-  host: "kafka"
-  port: 9094
+  host: "localhost"
+  port: 9092
   tracking_updated_topic_name: "tracking.updated"
 
 redis:
-  host: "redis"
+  host: "localhost"
   port: 6379
 
 trackbox:
@@ -20,22 +20,29 @@ trackbox:
   http_addr: ":8080"
   kafka_consumer_group: "track-api"
   current_status_ttl_seconds: 600
-  worker_poll_interval_seconds: 2
+
+  # Worker cadence (demo-fast)
+  worker_poll_interval_seconds: 1
   worker_batch_size: 100
   worker_concurrency: 10
-  worker_lease_seconds: 120
+  worker_lease_seconds: 10
+
   worker_rate_limit_per_minute: 120
   worker_rate_limit_cdek_per_minute: 60
   worker_rate_limit_post_ru_per_minute: 20
-  worker_http_addr: ":8082"
 
-  # Next check scheduling (defaults are 60s now; keeping explicit for clarity)
-  worker_next_check_in_transit_min_seconds: 60
-  worker_next_check_in_transit_max_seconds: 60
-  worker_next_check_unknown_seconds: 60
-  carrier_emulator_base_url: "http://carrier-emulator:9000"
+  # Scheduling (demo-fast)
+  worker_next_check_in_transit_min_seconds: 3
+  worker_next_check_in_transit_max_seconds: 8
+  worker_next_check_unknown_seconds: 10
+  worker_backoff_1_seconds: 2
+  worker_backoff_2_seconds: 5
+  worker_backoff_3_seconds: 10
+  worker_backoff_4_seconds: 20
+
+  carrier_emulator_base_url: "http://localhost:9000"
   carrier_emulator_mode: "v1"
   carrier_emulator_api_key: "demo-key"
-  carrier_emulator_domain: "trackbox.local"
+  carrier_emulator_domain: "localhost"
 
 
